@@ -53,7 +53,7 @@ function getBeta(s, eps) {
 }
 function hcne(input, stdout) {
     const s = input.s;
-    const eps = input['ε'];
+    const eps = input.eps;
     const n = s.length;
     const beta = getBeta(s, eps);
     let x = [], y = [];
@@ -75,8 +75,8 @@ function hcne(input, stdout) {
 window.addEventListener('DOMContentLoaded', function() {
     const paramS = new Param('s', new TextWidget(compose(assertSorted, listConv(',', toFloat)),
         false, oneToN(10), oneToN(10).toString()), 'score vector');
-    const paramEps = new Param('ε', new TextWidget(toFloat, false, 1e-8, '1e-8'),
-        'absolute accuracy of β');
+    const paramEps = new Param('eps', new TextWidget(toFloat, false, 1e-8, '1e-8'),
+        'ε', 'absolute accuracy of β');
     const paramGroup = new ParamGroup('myForm', [paramS, paramEps]);
     createForm('myApp', paramGroup, hcne);
 });
