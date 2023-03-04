@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="color-scheme" content="dark light" />
+<title>Hand Cricket NashEq</title>
+<link rel="stylesheet" href="https://sharmaeklavya2.github.io/funcToForm/funcToForm.css" />
+<!--<link rel="stylesheet" href="http://localhost:8080/websites/funcToForm/funcToForm.css" />-->
+<script type="text/javascript" src="https://sharmaeklavya2.github.io/funcToForm/funcToForm.js"></script>
+<!--<script type="text/javascript" src="http://localhost:8080/websites/funcToForm/funcToForm.js"></script>-->
+<script>
+'use strict';
+function oneToN(n) {
+    const a = [];
+    for(let i=1; i<=n; ++i) {
+        a.push(i);
+    }
+    return a;
+}
+function assertSorted(a) {
+    const n = a.length;
+    for(let i=1; i<n; ++i) {
+        if(a[i-1] > a[i]) {
+            throw new InputError('array is not sorted');
+        }
+    }
+    return a;
+}
+function getBeta(s, eps) {
+    const n = s.length;
+    function g(z) {
+        let total = 0;
+        for(let i=0; i<n; ++i) {
+            total += s[i] / (z + s[i]);
+        }
+        return total;
+    }
+    const sum = s.reduce((a, b) => a + b, 0);
+    let lb = sum - s[n-1], ub = sum - s[0];
+    let glb = g(lb), gub = g(ub);
+    while(ub - lb > eps) {
+        const mid = (ub + lb) / 2;
+        const gmid = g(mid);
+        if(gmid > 1) {
+            lb = mid; glb = gmid;
+        }
+        else {
+            ub = mid; gub = gmid;
+        }
+    }
+    return (lb + ub) / 2;
+}
+function hcne(input, stdout) {
+    const s = input.s;
+    const eps = input['ε'];
+    const n = s.length;
+    const beta = getBeta(s, eps);
+    let x = [], y = [];
+    for(let i=0; i<n; ++i) {
+        x.push(beta / (beta + s[i]) / (n-1));
+        y.push(s[i] / (beta + s[i]));
+    }
+    stdout.log('β:', beta);
+    stdout.log("batter's strategy:");
+    for(let i=0; i<n; ++i) {
+        stdout.log(`  ${i}:`, x[i]);
+    }
+    stdout.log("bowler's strategy:");
+    for(let i=0; i<n; ++i) {
+        stdout.log(`  ${i}:`, y[i]);
+    }
+}
+window.addEventListener('DOMContentLoaded', function() {
+    const paramS = new Param('s', new TextWidget(compose(assertSorted, listConv(',', toFloat)),
+        false, oneToN(10), oneToN(10).toString()), 'score vector');
+    const paramEps = new Param('ε', new TextWidget(toFloat, false, 1e-8, '1e-8'),
+        'absolute accuracy of β');
+    const paramGroup = new ParamGroup('myForm', [paramS, paramEps]);
+    createForm('myApp', paramGroup, hcne);
+});
+</script>
+</head>
+
+<body>
+<h1>Hand Cricket Nash Equilibrium</h1>
+<p>Computes a Nash Equilibrium for infinite ESM hand cricket.
+See <a href="https://sharmaeklavya2.github.io/blog/hand-cricket.html">this blog article</a> for details.</p>
+<div id="myApp"></div>
+</body>
+</html>
