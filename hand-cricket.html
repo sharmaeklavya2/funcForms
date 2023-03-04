@@ -61,6 +61,7 @@ function hcne(input, stdout) {
         x.push(beta / (beta + s[i]) / (n-1));
         y.push(s[i] / (beta + s[i]));
     }
+    stdout.clear();
     stdout.log('β:', beta);
     stdout.log("batter's strategy:");
     for(let i=0; i<n; ++i) {
