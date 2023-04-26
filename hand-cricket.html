@@ -27,6 +27,39 @@ function assertSorted(a) {
     }
     return a;
 }
+function weightedSample(x) {
+    let s = 0;
+    for(const xi of x) {
+        s += xi;
+    }
+    const n = x.length;
+    let r = Math.random();
+    for(let i=0; i<n; ++i) {
+        const pi = x[i]/s;
+        if(r <= pi) {
+            return i;
+        }
+        r -= pi;
+    }
+    return n-1;
+}
+function dotProd(x, y) {
+    // numerically stable dot product of positive vectors
+    const n = x.length;
+    if(y.length !== n) {
+        throw new Error(`dotProd: vectors have different lengths ${n} and ${y.length}`);
+    }
+    let prods = [];
+    for(let i=0; i<n; ++i) {
+        prods.push(x[i] * y[i]);
+    }
+    prods.sort((a, b) => a-b);
+    let s = 0;
+    for(const p of prods) {
+        s += p;
+    }
+    return s;
+}
 function getBeta(s, eps) {
     const n = s.length;
     function g(z) {
@@ -61,7 +94,14 @@ function hcne(input, stdout) {
         x.push(beta / (beta + s[i]) / (n-1));
         y.push(s[i] / (beta + s[i]));
     }
-    stdout.log('β:', beta);
+
+    stdout.log('expected score (β):', beta);
+    const randi = weightedSample(x);
+    const randj = weightedSample(y);
+    stdout.log(`random sample: {batter: ${randi}, bowler: ${randj}}`);
+    const pOut = dotProd(x, y);
+    stdout.log('expected game length:', 1/pOut);
+    stdout.log('score stddev:', beta * Math.sqrt(1 + dotProd(y, y) / (n-1)));
     stdout.log("batter's strategy:");
     for(let i=0; i<n; ++i) {
         stdout.log(`  ${i}:`, x[i]);
